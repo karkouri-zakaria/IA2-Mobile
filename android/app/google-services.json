@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "559088204120",
+    "project_id": "ia2-flutter",
+    "storage_bucket": "ia2-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559088204120:android:357391668f115fe8c60d2d",
+        "android_client_info": {
+          "package_name": "com.emsi.ia2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi3IWHM0RrRRjMsiL97yNYiwe0I1uEegc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559088204120:android:c4ca5d89a683d4abc60d2d",
+        "android_client_info": {
+          "package_name": "com.emsi.project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi3IWHM0RrRRjMsiL97yNYiwe0I1uEegc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
