@@ -5,7 +5,8 @@ import 'activity_model.dart';
 import 'ajout.dart';
 
 class ActivitiesScreen extends StatefulWidget {
-  const ActivitiesScreen({super.key});
+  final VoidCallback? onRefresh;
+  const ActivitiesScreen({Key? key, this.onRefresh}) : super(key: key);
 
   @override
   _ActivitiesScreenState createState() => _ActivitiesScreenState();
@@ -57,7 +58,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'ALl'),
+            Tab(text: 'All'),
             Tab(text: 'Sport'),
             Tab(text: 'Shopping'),
             Tab(text: 'Music'),
@@ -73,34 +74,21 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
           _buildBody(filterCategory: 'Music'),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-            if (_currentIndex == 1) {
-              // Navigate to AjoutPage when the "Ajout" tab is tapped
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Ajout()),
-              );
-            }
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: 'Activités',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Ajout',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
+    bottomNavigationBar: AppBottomNavigationBar(
+      currentIndex: _currentIndex,
+      onTabTapped: (index) {
+      setState(() {
+        _currentIndex = index;
+      if (_currentIndex == 1) {
+        Navigator.push(
+        context,
+      MaterialPageRoute(
+      builder: (context) => Ajout(onRefresh: () {}),
+      ),
+        );
+      }
+        });
+      },
       ),
     );
   }
@@ -134,10 +122,12 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
             leading: SizedBox(
               height: 50,
               width: 50,
-              child: Image.network(
-                activities[index].imageUrl,
-                fit: BoxFit.cover,
-              ),
+                child: Image.network(
+                  activities[index].imageUrl.toString(),
+                  width: 100.0,
+                  height: 100.0,
+                  fit: BoxFit.cover,
+                ),
             ),
             title: Text(activities[index].titre),
             subtitle: Text(
@@ -212,6 +202,39 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
           ],
         );
       },
+    );
+  }
+}
+
+class AppBottomNavigationBar extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTabTapped;
+
+  const AppBottomNavigationBar({
+    Key? key,
+    required this.currentIndex,
+    required this.onTabTapped,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+      currentIndex: currentIndex,
+      onTap: onTabTapped,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.event),
+          label: 'Activités',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.add),
+          label: 'Ajout',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profil',
+        ),
+      ],
     );
   }
 }

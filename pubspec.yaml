@@ -38,6 +38,9 @@ dependencies:
   firebase_core: ^2.23.0
   firebase_auth: ^4.14.1
   cloud_firestore: ^4.13.2
+  image_picker: ^1.0.4
+  firebase_storage: ^11.5.2
+  tflite: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +58,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/model/model_unquant.tflite
+    - assets/model/labels.txt
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

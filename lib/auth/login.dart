@@ -27,7 +27,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hanouta'),
+        title: const Text('EventFlow'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -85,6 +85,10 @@ class _LoginState extends State<Login> {
                     password: password,
                   );
 
+                    const SnackBar(
+                      content: Text('Login avec succès.'),
+                      backgroundColor: Colors.green,
+                    );
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -115,9 +119,12 @@ class _LoginState extends State<Login> {
             if (_loginError.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  _loginError,
-                  style: const TextStyle(color: Colors.red),
+                child: SnackBar(
+                  content: Text(
+                    _loginError,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: Colors.red,
                 ),
               ),
             TextButton(

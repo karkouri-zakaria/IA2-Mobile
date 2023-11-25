@@ -20,12 +20,12 @@ class Activity {
   factory Activity.fromSnapshot(DocumentSnapshot snapshot) {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
     return Activity(
-      titre: data['titre'],
-      lieu: data['lieu'],
-      prix: data['prix'],
-      imageUrl: data['imageUrl'],
-      minPersonne: data['minPersonne'],
-      categorie: data['categorie'],
+      titre: data['titre'].toString(),
+      lieu: data['lieu'].toString(),
+      prix: data['prix'].toString().toString(),
+      imageUrl: data['imageUrl'].toString(),
+      minPersonne: data['minPersonne'].toString(),
+      categorie: data['categorie'].toString(),
     );
   }
 }
