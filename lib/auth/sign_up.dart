@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../home/activities_screen.dart';
+import 'login.dart';
+
+
 class Signup extends StatefulWidget {
-  const Signup({super.key});
+  const Signup({Key? key}) : super(key: key);
 
   @override
-  _SignupState createState() => _SignupState();
+  SignupState createState() => SignupState();
 }
 
-class _SignupState extends State<Signup> {
+class SignupState extends State<Signup> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -21,139 +25,203 @@ class _SignupState extends State<Signup> {
   bool _showPassword = false;
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up'),
+        title: const Text(
+          'EventFlow',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 25,
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                errorText: _emailError,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: !_showPassword,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                errorText: _passwordError,
-                suffixIcon: IconButton(
-                  icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () {
-                    setState(() {
-                      _showPassword = !_showPassword;
-                    });
-                  },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.lightBlue, // Example color
+              Colors.blueAccent, // Example accent color
+            ],
+            tileMode: TileMode.clamp,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  labelStyle: const TextStyle(
+                    color: Colors.black,
+                  ),
+                  errorText: _emailError,
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 32.0),
-            ElevatedButton(
-              onPressed: () async {
-                // Clear previous errors
-                setState(() {
-                  _emailError = '';
-                  _passwordError = '';
-                  _signupError = '';
-                });
-
-                // Add your email and password format check
-                String email = _emailController.text;
-                String password = _passwordController.text;
-
-                if (!_isValidEmail(email)) {
-                  setState(() {
-                    _emailError = 'Invalid email format';
-                  });
-                  return;
-                }
-
-                if (!_isValidPassword(password)) {
-                  setState(() {
-                    _passwordError = 'Password must be at least 6 characters';
-                  });
-                  return;
-                }
-
-                try {
-                    await _auth.createUserWithEmailAndPassword(
-                    email: email,
-                    password: password,
-                  );
-
-                  // If successful, navigate to the Home page
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HomePage(), // Replace with the actual Home page widget
-                    ),
-                  );
-                } catch (e) {
-                  // Handle sign-up errors
-                  if (e is FirebaseAuthException) {
-                    if (e.code == 'email-already-in-use') {
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _passwordController,
+                obscureText: !_showPassword,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  labelStyle: const TextStyle(
+                    color: Colors.black,
+                  ),
+                  errorText: _passwordError,
+                  suffixIcon: IconButton(
+                    icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
+                    onPressed: () {
                       setState(() {
-                        _signupError = 'The email address is already in use.';
+                        _showPassword = !_showPassword;
                       });
-                    } else {
-                      setState(() {
-                        _signupError = 'Sign-up failed: ${e.message}';
+                    },
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32.0),
+              ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    _emailError = '';
+                    _passwordError = '';
+                    _signupError = '';
+                  });
+
+                  String email = _emailController.text;
+                  String password = _passwordController.text;
+
+                  if (!_isValidEmail(email)) {
+                    setState(() {
+                      _emailError = 'Invalid email format';
+                    });
+                    return;
+                  }
+
+                  if (!_isValidPassword(password)) {
+                    setState(() {
+                      _passwordError = 'Password must be at least 6 characters';
+                    });
+                    return;
+                  }
+
+                  try {
+                    await _auth.createUserWithEmailAndPassword(
+                      email: email,
+                      password: password,
+                    );
+
+                    if (context.mounted) {
+                      Future.delayed(const Duration(milliseconds: 300), () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ActivitiesScreen(),
+                          ),
+                        );
                       });
                     }
-                  } else {
-                    setState(() {
-                      _signupError = 'Sign-up failed: $e';
-                    });
+                  } catch (e) {
+                    if (e is FirebaseAuthException) {
+                      if (e.code == 'email-already-in-use') {
+                        setState(() {
+                          _signupError = 'The email address is already in use.';
+                        });
+                      } else {
+                        setState(() {
+                          _signupError = 'Sign-up failed: ${e.message}';
+                        });
+                      }
+                    } else {
+                      setState(() {
+                        _signupError = 'Sign-up failed: $e';
+                      });
+                    }
                   }
-                }
-              },
-              child: const Text('Sign Up'),
-            ),
-            if (_signupError.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  _signupError,
-                  style: const TextStyle(color: Colors.red),
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  backgroundColor: Colors.white,
+                  elevation: 5.0,
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                child: const Text(
+                  'S\'inscrire',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 18.0,
+                  ),
                 ),
               ),
-          ],
+              if (_emailError.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SnackBar(
+                    content: Text(
+                      _emailError,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: Colors.black,
+                  ),
+                ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Login(),
+                    ),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Vous avez déjà un compte ? Connectez-vous.'),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   bool _isValidEmail(String email) {
-    // You can implement a more sophisticated email validation if needed
     return RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$').hasMatch(email);
   }
+}
 
-  bool _isValidPassword(String password) {
-    // You can customize password requirements as needed
+bool _isValidPassword(String password) {
     return password.length >= 6;
   }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
-      body: const Center(
-        child: Text('Welcome to the Home page!'),
-      ),
-    );
-  }
-}

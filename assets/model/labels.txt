@@ -1,3 +1,4 @@
-0 Zakaria
-1 Ossama
-2 Achraf
+0 Football
+1 Échecs
+2 Escrime
+3 Autre

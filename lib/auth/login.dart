@@ -1,17 +1,17 @@
+import 'package:EventFlow/auth/sign_up.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:project/auth/sign_up.dart';
-import 'package:project/home/activities_screen.dart';
 
+import '../home/activities_screen.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
 
   @override
-  _LoginState createState() => _LoginState();
+  LoginState createState() => LoginState();
 }
 
-class _LoginState extends State<Login> {
+class LoginState extends State<Login> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -24,121 +24,200 @@ class _LoginState extends State<Login> {
   bool _showPassword = false;
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EventFlow'),
+        title: const Text(
+          'EventFlow',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 25,
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Login',
-                errorText: _emailError,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: !_showPassword,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                errorText: _passwordError,
-                suffixIcon: IconButton(
-                  icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () {
-                    setState(() {
-                      _showPassword = !_showPassword;
-                    });
-                  },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.blue, // Example color
+              Colors.lightBlue, // Example accent color
+            ],
+            tileMode: TileMode.clamp,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email', // Changed from 'Login' to 'Email'
+                  labelStyle: const TextStyle(
+                    color: Colors.black,
+                  ),
+                  errorText: _emailError,
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 32.0),
-            ElevatedButton(
-              onPressed: () async {
-                // Clear previous errors
-                setState(() {
-                  _emailError = '';
-                  _passwordError = '';
-                  _loginError = '';
-                });
-
-                // Add your email and password format check
-                String email = _emailController.text;
-                String password = _passwordController.text;
-
-                if (!_isValidEmail(email)) {
-                  setState(() {
-                    _emailError = 'Invalid email format';
-                  });
-                  return;
-                }
-
-                try {
-                    await _auth.signInWithEmailAndPassword(
-                    email: email,
-                    password: password,
-                  );
-
-                    const SnackBar(
-                      content: Text('Login avec succès.'),
-                      backgroundColor: Colors.green,
-                    );
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ActivitiesScreen(), // Replace with the actual Home page widget
-                    ),
-                  );
-                } catch (e) {
-                  // Handle login errors
-                  if (e is FirebaseAuthException) {
-                    if (e.code == 'wrong-password') {
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _passwordController,
+                obscureText: !_showPassword,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  labelStyle: const TextStyle(
+                    color: Colors.black,
+                  ),
+                  errorText: _passwordError,
+                  suffixIcon: IconButton(
+                    icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
+                    onPressed: () {
                       setState(() {
-                        _passwordError = 'Incorrect password';
+                        _showPassword = !_showPassword;
                       });
+                    },
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32.0),
+              ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    _emailError = '';
+                    _passwordError = '';
+                    _loginError = '';
+                  });
+
+                  String email = _emailController.text;
+                  String password = _passwordController.text;
+
+                  if (!_isValidEmail(email)) {
+                    setState(() {
+                      _emailError = 'Invalid email format';
+                    });
+                    return;
+                  }
+
+                  try {
+                    // Show loading indicator here if needed
+
+                    await _auth.signInWithEmailAndPassword(
+                      email: email,
+                      password: password,
+                    );
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Login successful.'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    }
+
+                    Future.delayed(const Duration(milliseconds: 300), () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ActivitiesScreen(),
+                        ),
+                      );
+                    });
+                  } catch (e) {
+                    // Removed redundant _loginError assignment
+                    print('Login failed: $e');
+
+                    if (e is FirebaseAuthException) {
+                      if (e.code == 'wrong-password') {
+                        setState(() {
+                          _passwordError = 'Incorrect password';
+                        });
+                      } else {
+                        setState(() {
+                          _loginError = 'Login failed: ${e.message}';
+                        });
+                      }
                     } else {
                       setState(() {
-                        _loginError = 'Login failed: ${e.message}';
+                        _loginError = 'Login failed: $e';
                       });
                     }
-                  } else {
-                    setState(() {
-                      _loginError = 'Login failed: $e';
-                    });
                   }
-                }
-              },
-              child: const Text('Se connecter'),
-            ),
-            if (_loginError.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SnackBar(
-                  content: Text(
-                    _loginError,
-                    style: const TextStyle(color: Colors.white),
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  backgroundColor: Colors.white,
+                  elevation: 5.0,
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                  backgroundColor: Colors.red,
+                ),
+                child: const Text(
+                  'Se connecter',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 18.0,
+                  ),
                 ),
               ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Signup(), // Replace with your sign-up screen widget
+              if (_loginError.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SnackBar(
+                    content: Text(
+                      _loginError,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: Colors.black,
                   ),
-                );
-              },
-              child: const Text('Don\'t have an account? Sign Up'),
-            ),
-          ],
+                ),
+              TextButton(
+                onPressed: () {
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Signup(),
+                      ),
+                    );
+                  });
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Vous n\'avez pas de compte ? Inscrivez-vous.'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -148,4 +227,3 @@ class _LoginState extends State<Login> {
     return RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$').hasMatch(email);
   }
 }
-

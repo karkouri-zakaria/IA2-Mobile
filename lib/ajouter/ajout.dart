@@ -3,20 +3,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:project/home/tflite.dart';
 
-import 'activities_screen.dart';
+import '../home/activities_screen.dart';
+import '../home/tflite.dart';
+import '../profil/profil.dart';
 
 class Ajout extends StatefulWidget {
-  final VoidCallback? onRefresh;
+  final Function? onRefresh;
 
   const Ajout({Key? key, this.onRefresh}) : super(key: key);
 
   @override
-  _AjoutState createState() => _AjoutState();
+  AjoutState createState() => AjoutState();
 }
 
-class _AjoutState extends State<Ajout> {
+class AjoutState extends State<Ajout> {
   bool loading = true;
   late File _image = File('');
   late String _categorie = '';
@@ -26,12 +27,21 @@ class _AjoutState extends State<Ajout> {
   TextEditingController minPersonController = TextEditingController();
   TextEditingController prixController = TextEditingController();
 
-  int _currentIndex = 0;
+  int _currentIndex = 1;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ajout'),
+        title: const Text(
+          'Ajout',
+          style: TextStyle(
+              color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.blue, // Change the app bar color
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -45,11 +55,7 @@ class _AjoutState extends State<Ajout> {
                 child: Column(
                   children: [
                     Container(
-                      margin: const EdgeInsets.only(top: 16),
-                      child: Text(_categorie),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 16),
+                      margin: const EdgeInsets.only(top: 16, bottom: 24),
                       child: Image.file(
                         _image,
                         height: 200,
@@ -63,29 +69,69 @@ class _AjoutState extends State<Ajout> {
                   : Container(),
               TextField(
                 controller: titreController,
-                decoration: const InputDecoration(labelText: 'titre'),
+                decoration: const InputDecoration(
+                  labelText: 'Titre',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                ),
               ),
+              const SizedBox(height: 10),
               TextField(
                 controller: lieuController,
-                decoration: const InputDecoration(labelText: 'lieu'),
+                decoration: const InputDecoration(
+                  labelText: 'Lieu',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                ),
               ),
+              const SizedBox(height: 10),
               TextField(
                 controller: minPersonController,
-                decoration:
-                const InputDecoration(labelText: 'Minimum de Personne'),
+                decoration: const InputDecoration(
+                  labelText: 'Minimum de Personne',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                ),
                 keyboardType: TextInputType.number,
               ),
+              const SizedBox(height: 10),
               TextField(
                 controller: prixController,
-                decoration: const InputDecoration(labelText: 'prix'),
+                decoration: const InputDecoration(
+                  labelText: 'Prix',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                ),
                 keyboardType: TextInputType.number,
               ),
-
-              // Submit button
+              Container(
+                  margin: const EdgeInsets.only(top: 16),
+                  child: TextField(
+                    readOnly: true,
+                    controller: TextEditingController(text: _categorie),
+                    style: const TextStyle(
+                      fontSize: 18,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Categorie',
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                    ),
+                  )
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   _saveDataToDatabase();
                 },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.blue, // text color
+                ),
                 child: const Text('Valider'),
               ),
             ],
@@ -100,7 +146,7 @@ class _AjoutState extends State<Ajout> {
             color: Colors.blue,
           ),
           child: const Icon(
-            Icons.add,
+            Icons.image,
             size: 30,
             color: Colors.white,
           ),
@@ -112,7 +158,9 @@ class _AjoutState extends State<Ajout> {
               title: const Text('Camera'),
               onTap: () {
                 _pickImage(ImageSource.camera);
-                Navigator.pop(context);
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ),
@@ -141,15 +189,26 @@ class _AjoutState extends State<Ajout> {
                 ),
               );
             }
+            if (_currentIndex == 2) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Profil(),
+                ),
+              );
+            }
           });
         },
       ),
     );
   }
 
-
   Future<void> _pickImage(ImageSource source) async {
-    var image = await ImagePicker().pickImage(source: source, maxWidth: 1800, maxHeight: 1800,);
+    var image = await ImagePicker().pickImage(
+      source: source,
+      maxWidth: 1800,
+      maxHeight: 1800,
+    );
     if (image == null) {
       return;
     } else {
@@ -158,30 +217,32 @@ class _AjoutState extends State<Ajout> {
       });
       List<dynamic>? output = await TFliteModel(_image).detectImage();
       setState(() {
-        if (output?[0]['confidence']>0.8) _categorie = output![0]['label'].toString().substring(2);
-        else _categorie = 'autre';
+        if (output?[0]['confidence'] > 0.8) {
+          _categorie = output![0]['label'].toString().substring(2);
+        } else {
+          _categorie = 'autre';
+        }
       });
     }
   }
 
 
-  void _saveDataToDatabase() async {
+void _saveDataToDatabase() async {
     String titre = titreController.text;
     String lieu = lieuController.text;
     int minPerson = int.tryParse(minPersonController.text) ?? 0;
     double prix = double.tryParse(prixController.text) ?? 0.0;
 
-    //if (titre.isEmpty || lieu.isEmpty || minPerson <= 0 || prix <= 0.0) {
+    if (titre.isEmpty || lieu.isEmpty || minPerson <= 0 || prix <= 0.0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez remplir tous les champs et sélectionner une image.'),
           backgroundColor: Colors.red,
         ),
       );
-      //return;
-    //}
+      return;
+    }
 
-    // Upload image to Firebase Storage
     try {
       String imageName = DateTime.now().millisecondsSinceEpoch.toString();
       firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
@@ -191,39 +252,34 @@ class _AjoutState extends State<Ajout> {
       await ref.putFile(_image);
       String imageUrl = await ref.getDownloadURL();
 
-      // Save data to Firebase Firestore
       await FirebaseFirestore.instance.collection('Activities').add({
         'titre': titre,
         'lieu': lieu,
-        'minPerson': minPerson,
+        'minPersonne': minPerson,
         'prix': prix,
         'imageUrl': imageUrl,
         'categorie' : _categorie
       });
 
-      List<dynamic>? output = await TFliteModel(_image).detectImage();
-      if (output != null) {
-        print('Output: ${output[0]['confidence']}');
-      } else {
-        print('Error during inference or output is null.');
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Données enregistrées avec succès.'),
           backgroundColor: Colors.green,
         ),
       );
-      widget.onRefresh?.call();
+      }
     } catch (error) {
-      print('Error saving data to Firestore and uploading image: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Une erreur est survenue. Veuillez réessayer.'),
           backgroundColor: Colors.red,
         ),
       );
+      }
     }
+    widget.onRefresh!();
   }
 
 

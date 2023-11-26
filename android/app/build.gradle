@@ -67,10 +67,6 @@ android {
     dexOptions {
         javaMaxHeapSize "4g"
     }
-
-    dependencies {
-        implementation 'org.tensorflow:tensorflow-lite:+'
-    }
 }
 
 flutter {

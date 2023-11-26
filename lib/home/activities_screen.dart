@@ -1,18 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../profil/profil.dart';
 import 'activity_model.dart';
-import 'ajout.dart';
+import '../ajouter/ajout.dart';
 
 class ActivitiesScreen extends StatefulWidget {
-  final VoidCallback? onRefresh;
+  final Function? onRefresh;
   const ActivitiesScreen({Key? key, this.onRefresh}) : super(key: key);
 
   @override
-  _ActivitiesScreenState createState() => _ActivitiesScreenState();
+  ActivitiesScreenState createState() => ActivitiesScreenState();
 }
 
-class _ActivitiesScreenState extends State<ActivitiesScreen>
+class ActivitiesScreenState extends State<ActivitiesScreen>
     with SingleTickerProviderStateMixin {
   late Future<List<Activity>> activities;
   late TabController _tabController;
@@ -22,6 +24,12 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     activities = _fetchActivities();
+  }
+
+  void _refreshData() {
+    setState(() {
+      activities = _fetchActivities();
+    });
   }
 
   Future<List<Activity>> _fetchActivities() async {
@@ -41,54 +49,106 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.deepOrange, // Set the background color
         title: const Row(
           children: [
             Icon(
               Icons.adobe_sharp,
-              color: Colors.orange,
+              color: Colors.white, // Set the icon color
               size: 42,
             ),
             SizedBox(width: 8),
             Text(
               'Activités',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20, // Set the font size
+                fontWeight: FontWeight.bold, // Set the font weight
+              ),
             ),
           ],
         ),
-        bottom: TabBar(
+        elevation: 4, // Set the elevation/shadow
+        centerTitle: false, // Align the title to the start
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.notifications,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              // Add your notification action here
+            },
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.settings,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              // Add your settings action here
+            },
+          ),
+        ],
+      // Add the rest of your app content here
+      bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'All'),
-            Tab(text: 'Sport'),
-            Tab(text: 'Shopping'),
-            Tab(text: 'Music'),
+            Tab(text: 'Tous'),
+            Tab(text: 'Football'),
+            Tab(text: 'Échecs'),
+            Tab(text: 'Escrime'),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildBody(), // All
-          _buildBody(filterCategory: 'Sport'),
-          _buildBody(filterCategory: 'Shopping'),
-          _buildBody(filterCategory: 'Music'),
-        ],
+      body: Container(
+        decoration: BoxDecoration(
+          color: Colors.white, // Set the background color
+          borderRadius: BorderRadius.circular(10.0), // Add rounded corners
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 3,
+              blurRadius: 5,
+              offset: const Offset(0, 3), // Change the shadow offset if needed
+            ),
+          ],
+        ),
+        child: TabBarView(
+          controller: _tabController,
+          physics: const BouncingScrollPhysics(), // Optional: Add bouncing scroll effect
+          dragStartBehavior: DragStartBehavior.start,
+          children: [
+            _buildBody(),
+            _buildBody(filterCategory: 'Football'),
+            _buildBody(filterCategory: 'Échecs'),
+            _buildBody(filterCategory: 'Fencing'),
+          ],
+        ),
       ),
-    bottomNavigationBar: AppBottomNavigationBar(
-      currentIndex: _currentIndex,
-      onTabTapped: (index) {
-      setState(() {
-        _currentIndex = index;
-      if (_currentIndex == 1) {
-        Navigator.push(
-        context,
-      MaterialPageRoute(
-      builder: (context) => Ajout(onRefresh: () {}),
-      ),
-        );
-      }
-        });
-      },
+      bottomNavigationBar: AppBottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTabTapped: (index) {
+          setState(() {
+            _currentIndex = index;
+            if (_currentIndex == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Ajout(onRefresh: _refreshData),
+                ),
+              );
+            }
+            if (_currentIndex == 2) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Profil(onRefresh: _refreshData),
+                ),
+              );
+            }
+          });
+        },
       ),
     );
   }
@@ -115,23 +175,44 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
       return ListView.builder(
         itemCount: activities.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            onTap: () {
-              _showActivityDetails(activities[index]);
-            },
-            leading: SizedBox(
-              height: 50,
-              width: 50,
-                child: Image.network(
-                  activities[index].imageUrl.toString(),
-                  width: 100.0,
-                  height: 100.0,
-                  fit: BoxFit.cover,
+          return Card(
+            elevation: 3, // Add a slight shadow to the cards
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: InkWell(
+              onTap: () {
+                _showActivityDetails(activities[index]);
+              },
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(16),
+                leading: SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      activities[index].imageUrl.toString(),
+                      width: 100.0,
+                      height: 100.0,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
-            ),
-            title: Text(activities[index].titre),
-            subtitle: Text(
-              '${activities[index].lieu} - ${activities[index].prix}',
+                title: Text(
+                  activities[index].titre,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue, // Set the title text color
+                  ),
+                ),
+                subtitle: Text(
+                  '${activities[index].lieu} - ${activities[index].prix}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey, // Set the subtitle text color
+                  ),
+                ),
+              ),
             ),
           );
         },
@@ -139,14 +220,13 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
     }
   }
 
+
   Future<List<Activity>> _fetchFilteredActivities(String? filterCategory) async {
     QuerySnapshot querySnapshot;
 
     if (filterCategory == null || filterCategory.isEmpty) {
-      // Fetch all activities when filterCategory is null or empty
       querySnapshot = await FirebaseFirestore.instance.collection('Activities').get();
     } else {
-      // Fetch filtered activities based on the category
       querySnapshot = await FirebaseFirestore.instance
           .collection('Activities')
           .where('categorie', isEqualTo: filterCategory)
@@ -169,7 +249,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
           title: Text(
             activity.titre,
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -177,15 +257,17 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
+              Container(
                 width: double.infinity,
-                child: Image.network(
-                  activity.imageUrl,
-                  height: 350, // Set your preferred height
-                  fit: BoxFit.cover,
+                height: 200,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(activity.imageUrl),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 18),
               Text('Lieu: ${activity.lieu}'),
               Text('Prix: ${activity.prix}'),
               Text('Minimum Personnes: ${activity.minPersonne}'),
@@ -218,23 +300,45 @@ class AppBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTabTapped,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.event),
-          label: 'Activités',
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            offset: Offset(0, -1),
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: onTabTapped,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Montserrat', // Use a custom font for selected labels
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.add),
-          label: 'Ajout',
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.normal,
+          fontFamily: 'Montserrat', // Use a custom font for unselected labels
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profil',
-        ),
-      ],
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event, size: 28), // Adjust icon size
+            label: 'Activités',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add, size: 28), // Adjust icon size
+            label: 'Ajout',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person, size: 28), // Adjust icon size
+            label: 'Profil',
+          ),
+        ],
+      ),
     );
   }
 }

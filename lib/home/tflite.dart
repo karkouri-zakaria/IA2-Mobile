@@ -7,7 +7,6 @@ class TFliteModel {
 
   TFliteModel(File image) {
     _image = image;
-    // Load the model in the constructor
     loadModel();
   }
 
@@ -21,10 +20,8 @@ class TFliteModel {
         imageStd: 127.5,
         asynch: true,
       );
-
       return prediction;
     } catch (e) {
-      print('Error during inference: $e');
       return null;
     } finally {
       Tflite.close();
@@ -41,16 +38,13 @@ class TFliteModel {
         useGpuDelegate: false,
       );
 
-      // Set loading to false after successfully loading the model
       loading = false;
     } catch (e) {
-      print('Error loading TFLite model: $e');
+      return;
     }
   }
 
-  // Additional method to reload the model if needed
   Future<void> reloadModel() async {
-    // Add any cleanup or additional setup logic if needed
     await Tflite.close();
     await loadModel();
   }
