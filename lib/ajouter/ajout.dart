@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../BottomBar/bottom_bar.dart';
 import '../home/activities_screen.dart';
 import '../home/tflite.dart';
 import '../profil/profil.dart';

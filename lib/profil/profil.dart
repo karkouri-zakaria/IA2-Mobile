@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../BottomBar/bottom_bar.dart';
 import '../ajouter/ajout.dart';
 import '../auth/login.dart';
 import '../home/activities_screen.dart';
